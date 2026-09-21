@@ -42,7 +42,7 @@ Victims are scattered and hidden. A fleet of heterogeneous agents has to:
                          └─────────────▲──────────────┘
                                        │ agent observations / actions
                          ┌─────────────┴──────────────┐
-                         │   Agent Intelligence (Saatwik)│
+                         │   Agent Intelligence (Sathwik)│
                          │  ┌────────────┐ ┌─────────┐ │
                          │  │ MAPPO /     │ │ LLM+RAG │ │
                          │  │ MADDPG      │ │ task    │ │
