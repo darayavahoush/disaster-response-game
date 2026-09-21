@@ -1,0 +1,15 @@
+{
+  "name": "aegis-simulation-engine",
+  "version": "0.1.0",
+  "description": "World engine for the Aegis disaster-response sim: terrain, flood/cyclone/earthquake physics, victim placement.",
+  "type": "module",
+  "main": "service/server.js",
+  "scripts": {
+    "start": "node service/server.js",
+    "dev": "node --watch service/server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
+  }
+}

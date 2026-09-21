@@ -1,0 +1,16 @@
+{
+  "name": "aegis-backend-gateway",
+  "version": "0.1.0",
+  "description": "Gateway service for the Aegis disaster-response sim: WebSocket broadcast of world_state, REST commands, knowledge_query proxy.",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "ws": "^8.18.0"
+  }
+}

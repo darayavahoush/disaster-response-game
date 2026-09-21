@@ -1,0 +1,10 @@
+{
+  "name": "aegis-planning-astar-mcts",
+  "version": "0.1.0",
+  "description": "Hazard-aware A* routing + Monte Carlo mission assignment for the Aegis sim. Owner: Ananya.",
+  "type": "module",
+  "main": "src/missionPlanner.js",
+  "scripts": {
+    "test": "node test/smoke.test.js"
+  }
+}

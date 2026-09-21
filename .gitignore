@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 node_modules/
 dist/
 .DS_Store
@@ -6,3 +7,6 @@ __pycache__/
 .venv/
 *.egg-info/
 .env
+=======
+**/node_modules/
+>>>>>>> bb12a30f (hi)
