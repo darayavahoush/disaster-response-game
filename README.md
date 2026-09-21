@@ -101,6 +101,6 @@ for a real WebSocket client once the simulation engine exposes one (see `docs/ap
 
 - [x] Repo structure
 - [x] Frontend command-center UI (mock data, live-updating)
-- [ ] Simulation engine (world, CNN, LSTM, A*/MCTS) — Avinandan
+- [x] Simulation engine (world, CNN, LSTM, A*/MCTS) — Avinandan
 - [ ] Agent intelligence (MAPPO/MADDPG, LLM/RAG) — Saatwik
 - [ ] Wire frontend to real engine over WebSocket
