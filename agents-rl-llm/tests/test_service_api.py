@@ -17,11 +17,89 @@ real simulation engine:
 
 from __future__ import annotations
 
+import importlib.util
 import json
+import os
+import sys
+import types
 import unittest
 
-from agents_rl_llm import service
-from agents_rl_llm.llm_rag.task_decomposition import RuleBasedProvider
+# --------------------------------------------------------------------------
+# Path-based loading for `agents-rl-llm/service.py`
+#
+# `agents-rl-llm/` and `llm-rag/`/`mappo-maddpg/` are hyphenated directory
+# names, so they cannot be reached via a normal dotted Python import (there
+# is no `agents_rl_llm` package on disk, and none is created here -- see
+# `tests/test_task_decomposition.py`, which loads `task_decomposition.py`
+# the same way: directly from its file path).
+#
+# `service.py` itself, however, is written with absolute dotted imports
+# (`from agents_rl_llm.llm_rag.task_decomposition import ...`, etc.) that we
+# are not allowed to modify. To load it as-is, we register lightweight,
+# in-memory namespace-package stubs in `sys.modules` under the dotted names
+# it expects, with each stub's `__path__` pointing at the real (hyphenated)
+# on-disk directory. That lets Python's normal import machinery resolve
+# `service.py`'s own submodule imports (`...llm_rag.task_decomposition`,
+# `...llm_rag.knowledge_base`, `...llm_rag.ollama_provider`,
+# `...mappo_maddpg.env`, `...mappo_maddpg.policy`) by finding the
+# identically-named .py files inside those directories -- no `__init__.py`
+# is added anywhere, and no real `agents_rl_llm` package is created on disk.
+# --------------------------------------------------------------------------
+
+_THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+_AGENTS_DIR = os.path.dirname(_THIS_DIR)  # .../agents-rl-llm
+_LLM_RAG_DIR = os.path.join(_AGENTS_DIR, "llm-rag")
+_MAPPO_DIR = os.path.join(_AGENTS_DIR, "mappo-maddpg")
+_TASK_DECOMPOSITION_PATH = os.path.join(_LLM_RAG_DIR, "task_decomposition.py")
+
+
+def _load_module_from_path(module_name: str, path: str):
+    spec = importlib.util.spec_from_file_location(module_name, path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def _ensure_namespace_package(name: str, directory: str):
+    """Register (or reuse) an in-memory package stub at `name` whose
+    `__path__` is the real on-disk `directory`, so normal submodule
+    imports under that dotted name resolve to files in that directory."""
+    existing = sys.modules.get(name)
+    if existing is not None:
+        return existing
+    stub = types.ModuleType(name)
+    stub.__path__ = [directory]
+    stub.__package__ = name
+    sys.modules[name] = stub
+    return stub
+
+
+# `task_decomposition.py` must be loaded exactly once and shared under both
+# its plain name (as `ollama_provider.py` imports it -- see that module's
+# own docstring) and its dotted name (as `service.py` and `knowledge_base.py`
+# import it), so classes like `RuleBasedProvider` are the same object
+# everywhere (required for `isinstance` checks to behave correctly).
+if "task_decomposition" in sys.modules:
+    _task_decomposition = sys.modules["task_decomposition"]
+else:
+    _task_decomposition = _load_module_from_path("task_decomposition", _TASK_DECOMPOSITION_PATH)
+
+_agents_rl_llm_pkg = _ensure_namespace_package("agents_rl_llm", _AGENTS_DIR)
+_llm_rag_pkg = _ensure_namespace_package("agents_rl_llm.llm_rag", _LLM_RAG_DIR)
+_mappo_pkg = _ensure_namespace_package("agents_rl_llm.mappo_maddpg", _MAPPO_DIR)
+
+sys.modules.setdefault("agents_rl_llm.llm_rag.task_decomposition", _task_decomposition)
+_llm_rag_pkg.task_decomposition = _task_decomposition
+_agents_rl_llm_pkg.llm_rag = _llm_rag_pkg
+_agents_rl_llm_pkg.mappo_maddpg = _mappo_pkg
+
+if "agents_rl_llm.service" in sys.modules:
+    service = sys.modules["agents_rl_llm.service"]
+else:
+    import agents_rl_llm.service as service  # noqa: E402 - see path-based loading note above
+
+RuleBasedProvider = _task_decomposition.RuleBasedProvider
 
 
 class FakeMappoPolicy:
